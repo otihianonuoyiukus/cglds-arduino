@@ -27,55 +27,63 @@ wss.on("connection", (ws) => {
   });
 
   ws.on("message", (data) => {
-    let parsedData = JSON.parse(String(data).replace(/'/g, '"'));
-    parsedData = {
-      ...parsedData,
-      data: { ...parsedData?.data, id: ws._socket.remoteAddress },
-    };
+    try {
+      console.log(data);
+      let parsedData = JSON.parse(String(data).replace(/'/g, '"'));
+      parsedData = {
+        ...parsedData,
+        data: { ...parsedData?.data, id: ws._socket.remoteAddress },
+      };
 
-    if (parsedData.type === "register") {
-      if (!clientList?.find((client) => client?.id === parsedData?.data?.id)) {
-        if (parsedData.data.type === "arduino") {
-          clientList.push({
-            type: parsedData.data.type,
-            id: String(ws._socket.remoteAddress),
-            clientId: parsedData.data.clientId,
-            client: ws,
-            name: parsedData.data.name,
-            sensorValue: parsedData.data.sensorValue,
-            dateTime: moment().format("MMMM Do YYYY, h:mm:ss a").toString(),
-          });
-        } else {
-          clientList.push({
-            type: parsedData.data.type,
-            id: String(ws._socket.remoteAddress),
-            clientId: parsedData.data.clientId,
-            client: ws,
-            name: parsedData.data.name,
-          });
-        }
-      }
-    } else if (parsedData.type === "message") {
-      if (parsedData.data.type === "arduino") {
-        clientList = clientList.map((client) => {
-          if (client.id === parsedData.data.id) {
-            return {
-              ...client,
+      if (parsedData.type === "register") {
+        if (
+          !clientList?.find((client) => client?.id === parsedData?.data?.id)
+        ) {
+          if (parsedData.data.type === "arduino") {
+            clientList.push({
+              type: parsedData.data.type,
+              id: String(ws._socket.remoteAddress),
+              clientId: parsedData.data.clientId,
+              client: ws,
+              name: parsedData.data.name,
               sensorValue: parsedData.data.sensorValue,
               dateTime: moment().format("MMMM Do YYYY, h:mm:ss a").toString(),
-            };
+            });
+          } else {
+            clientList.push({
+              type: parsedData.data.type,
+              id: String(ws._socket.remoteAddress),
+              clientId: parsedData.data.clientId,
+              client: ws,
+              name: parsedData.data.name,
+            });
           }
-          return client;
-        });
-      } else {
+        }
+      } else if (parsedData.type === "message") {
+        if (parsedData.data.type === "arduino") {
+          clientList = clientList.map((client) => {
+            if (client.id === parsedData.data.id) {
+              return {
+                ...client,
+                sensorValue: parsedData.data.sensorValue,
+                dateTime: moment().format("MMMM Do YYYY, h:mm:ss a").toString(),
+              };
+            }
+            return client;
+          });
+        } else {
+        }
       }
+
+      // TODO: Work on differentiating the different types of clients
+      // if (clientList.some((client) => client?.type === "arduino")) {
+      // }
+
+      console.log(clientList.length);
+    } catch (error) {
+      console.error(error);
+      return;
     }
-
-    // TODO: Work on differentiating the different types of clients
-    // if (clientList.some((client) => client?.type === "arduino")) {
-    // }
-
-    console.log(clientList.length);
   });
 });
 
