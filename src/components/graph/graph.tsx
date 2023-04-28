@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Card, Space, Typography } from "antd";
+import { useEffect, useRef, useState } from "react";
+import { Card, Empty } from "antd";
 import { Line } from "@ant-design/plots";
 import { graphBodyStyle, graphTitleStyle } from "./graph.style";
 import { GraphData } from "./graph-data";
@@ -45,7 +45,12 @@ export const Graph = ({ unitList }: GraphData) => {
 
   return (
     <Card size="default" hoverable style={graphBodyStyle}>
-      <Line {...config} style={{ width: "100%" }} />
+      <Line
+        {...config}
+        style={{ width: "100%" }}
+        loadingTemplate={<Empty />}
+        loading={(unitList?.length || 0) < 1}
+      />
     </Card>
   );
 };
