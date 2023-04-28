@@ -4,4 +4,5 @@ export interface UnitData {
   sensorValue?: number;
   dateTime?: string;
   loading?: boolean;
+  onOpenValve?: (id: string) => void;
 }

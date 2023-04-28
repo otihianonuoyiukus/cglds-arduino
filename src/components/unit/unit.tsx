@@ -1,7 +1,16 @@
-import { Card, Skeleton, Space, Typography } from "antd";
+import {
+  Button,
+  Card,
+  Dropdown,
+  MenuProps,
+  Skeleton,
+  Space,
+  Typography,
+} from "antd";
 import { SettingOutlined } from "@ant-design/icons";
 import { unitBodyStyle, unitContentStyle, unitTitleStyle } from "./unit.style";
 import { UnitData } from "./unit-data";
+import { useCallback } from "react";
 
 const { Title, Text } = Typography;
 
@@ -11,7 +20,22 @@ export const Unit = ({
   sensorValue,
   dateTime,
   loading,
+  onOpenValve,
 }: UnitData) => {
+  const handleClick = useCallback(() => {
+    if (onOpenValve && id) {
+      onOpenValve(id);
+    }
+  }, [id, onOpenValve]);
+
+  const items: MenuProps["items"] = [
+    {
+      key: "1",
+      label: "Open valve",
+      onClick: handleClick,
+    },
+  ];
+
   return (
     <>
       <Space direction="vertical">
@@ -27,7 +51,18 @@ export const Unit = ({
               </Title>
             )
           }
-          extra={<SettingOutlined />}
+          extra={
+            loading ? null : (
+              <Dropdown
+                menu={{ items }}
+                placement="topLeft"
+                trigger={["click"]}
+                arrow
+              >
+                <Button icon={<SettingOutlined />} size={"large"} />
+              </Dropdown>
+            )
+          }
           style={unitBodyStyle}
         >
           <Space direction="vertical" style={unitContentStyle}>

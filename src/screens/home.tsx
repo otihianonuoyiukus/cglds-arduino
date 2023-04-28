@@ -8,6 +8,8 @@ import { Graph } from "../components/graph/graph";
 
 const { Title } = Typography;
 
+const SENSOR_THRESHOLD = 500;
+
 const registerMessage = {
   type: "register",
   data: {
@@ -21,8 +23,15 @@ export const Home = () => {
   const [unitList, setUnitList] = useState<UnitData[]>([]);
   const [socket, setSocket] = useState<WebSocket>();
 
+  const handleOpenValve = (id: string) => {
+    if (socket) {
+      socket.send("TEST LMAO");
+    }
+  };
+
   useEffect(() => {
     const ws = new WebSocket("ws://192.168.86.21:8080");
+
     ws.onopen = () => {
       console.log("Connected to WebSocket server");
       ws.send(JSON.stringify(registerMessage));
@@ -35,11 +44,23 @@ export const Home = () => {
     ws.onerror = (error) => {
       console.log(error);
     };
+
     setSocket(ws);
+
     return () => {
       ws.close();
     };
   }, []);
+
+  useEffect(() => {
+    if (unitList.length > 0) {
+      unitList.forEach((unit) => {
+        if ((unit.sensorValue || 0) > SENSOR_THRESHOLD) {
+          //TODO: DO THIS AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        }
+      });
+    }
+  }, [unitList]);
 
   const {
     token: { colorBgContainer },
@@ -68,6 +89,7 @@ export const Home = () => {
                     name={unit.name}
                     sensorValue={unit.sensorValue}
                     dateTime={unit.dateTime}
+                    onOpenValve={handleOpenValve}
                   />
                 ))
               )}
