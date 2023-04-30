@@ -23,12 +23,6 @@ export const Home = () => {
   const [unitList, setUnitList] = useState<UnitData[]>([]);
   const [socket, setSocket] = useState<WebSocket>();
 
-  const handleOpenValve = (id: string) => {
-    if (socket) {
-      socket.send("TEST LMAO");
-    }
-  };
-
   useEffect(() => {
     const ws = new WebSocket("ws://192.168.86.21:8080");
 
@@ -51,16 +45,6 @@ export const Home = () => {
       ws.close();
     };
   }, []);
-
-  useEffect(() => {
-    if (unitList.length > 0) {
-      unitList.forEach((unit) => {
-        if ((unit.sensorValue || 0) > SENSOR_THRESHOLD) {
-          //TODO: DO THIS AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-        }
-      });
-    }
-  }, [unitList]);
 
   const {
     token: { colorBgContainer },
@@ -89,7 +73,6 @@ export const Home = () => {
                     name={unit.name}
                     sensorValue={unit.sensorValue}
                     dateTime={unit.dateTime}
-                    onOpenValve={handleOpenValve}
                   />
                 ))
               )}
