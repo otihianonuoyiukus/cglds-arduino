@@ -44,7 +44,7 @@ export const Graph = ({ unitList }: GraphData) => {
   };
 
   return (
-    <Card size="default" hoverable style={graphBodyStyle}>
+    <Card size="default" style={graphBodyStyle}>
       <Line
         {...config}
         style={{ width: "100%" }}

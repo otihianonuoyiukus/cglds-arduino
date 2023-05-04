@@ -1,18 +1,19 @@
+import { Badge, Card, Skeleton, Space, Typography, notification } from "antd";
+import { ExclamationCircleOutlined, WarningOutlined } from "@ant-design/icons";
 import {
-  Button,
-  Card,
-  Dropdown,
-  MenuProps,
-  Skeleton,
-  Space,
-  Typography,
-} from "antd";
-import { SettingOutlined } from "@ant-design/icons";
-import { unitBodyStyle, unitContentStyle, unitTitleStyle } from "./unit.style";
+  unitBodyStyle,
+  unitContentStyle,
+  unitTitleStyle,
+  unitNotificationStyle,
+  unitBadgeStyle,
+  unitSensorValueWarningStyle,
+} from "./unit.style";
 import { UnitData } from "./unit-data";
-import { useCallback } from "react";
+import { useState, useEffect } from "react";
 
 const { Title, Text } = Typography;
+
+const MAX_THRESHOLD = import.meta.env.VITE_SENSOR_VALUE_THRESHOLD;
 
 export const Unit = ({
   id,
@@ -20,64 +21,72 @@ export const Unit = ({
   sensorValue,
   dateTime,
   loading,
-  onOpenValve,
 }: UnitData) => {
-  const handleClick = useCallback(() => {
-    if (onOpenValve && id) {
-      onOpenValve(id);
-    }
-  }, [id, onOpenValve]);
+  const [notificationOpened, setNotificationOpened] = useState(false);
 
-  const items: MenuProps["items"] = [
-    {
-      key: "1",
-      label: "Open valve",
-      onClick: handleClick,
-    },
-  ];
+  const openNotification = () => {
+    notification.warning({
+      key: id,
+      message: "Warning",
+      description: "High levels of gas detected!",
+      duration: null,
+      placement: "bottomRight",
+      style: unitNotificationStyle,
+    });
+  };
+
+  useEffect(() => {
+    if (!notificationOpened && (sensorValue || 0) >= MAX_THRESHOLD) {
+      openNotification();
+      setNotificationOpened(true);
+    } else if (notificationOpened && !((sensorValue || 0) >= MAX_THRESHOLD)) {
+      notification.destroy(id);
+      setNotificationOpened(false);
+    }
+  }, [notificationOpened, sensorValue]);
 
   return (
     <>
       <Space direction="vertical">
-        <Card
-          size="default"
-          hoverable
-          title={
-            loading ? (
-              <Skeleton.Input active={true} size={"default"} />
-            ) : (
-              <Title level={5} style={unitTitleStyle}>
-                {name}
-              </Title>
-            )
+        <Badge
+          count={
+            (sensorValue || 0) >= MAX_THRESHOLD ? (
+              <ExclamationCircleOutlined style={unitBadgeStyle} />
+            ) : null
           }
-          extra={
-            loading ? null : (
-              <Dropdown
-                menu={{ items }}
-                placement="topLeft"
-                trigger={["click"]}
-                arrow
-              >
-                <Button icon={<SettingOutlined />} size={"large"} />
-              </Dropdown>
-            )
-          }
-          style={unitBodyStyle}
         >
-          <Space direction="vertical" style={unitContentStyle}>
-            {loading ? (
-              <Skeleton active />
-            ) : (
-              <>
-                <Text>{`ID: ${id}`}</Text>
-                <Text>{dateTime?.split(",")[0]}</Text>
-                <Text>{dateTime?.split(",")[1]}</Text>
-                <Text>{`Value: ${sensorValue}`}</Text>
-              </>
-            )}
-          </Space>
-        </Card>
+          <Card
+            size="default"
+            title={
+              loading ? (
+                <Skeleton.Input active={true} size={"default"} />
+              ) : (
+                <Title level={5} style={unitTitleStyle}>
+                  {name}
+                </Title>
+              )
+            }
+            style={unitBodyStyle}
+          >
+            <Space direction="vertical" style={unitContentStyle}>
+              {loading ? (
+                <Skeleton active />
+              ) : (
+                <>
+                  <Text>{`ID: ${id}`}</Text>
+                  <Text>{dateTime?.split(",")[0]}</Text>
+                  <Text>{dateTime?.split(",")[1]}</Text>
+                  <Text>
+                    {`Value: ${sensorValue} `}
+                    {(sensorValue || 0) >= MAX_THRESHOLD && (
+                      <WarningOutlined style={unitSensorValueWarningStyle} />
+                    )}
+                  </Text>
+                </>
+              )}
+            </Space>
+          </Card>
+        </Badge>
       </Space>
     </>
   );

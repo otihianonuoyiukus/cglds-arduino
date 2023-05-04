@@ -28,7 +28,6 @@ wss.on("connection", (ws) => {
 
   ws.on("message", (data) => {
     try {
-      console.log(data);
       let parsedData = JSON.parse(String(data).replace(/'/g, '"'));
       parsedData = {
         ...parsedData,
@@ -74,12 +73,6 @@ wss.on("connection", (ws) => {
         } else {
         }
       }
-
-      // TODO: Work on differentiating the different types of clients
-      // if (clientList.some((client) => client?.type === "arduino")) {
-      // }
-
-      console.log(clientList.length);
     } catch (error) {
       console.error(error);
       return;
